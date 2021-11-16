@@ -92,28 +92,26 @@ func takeQuiz(timeDurance int64, shuffle bool) (int, int) {
 	var input string
 	rightAnswer := 0
 	wrongAnswer := 0
-	timer := time.NewTimer(time.Duration(timeDurance * int64(time.Second)))
+	//timer := time.NewTimer(time.Duration(timeDurance * int64(time.Second)))
 
 	if shuffle == true {
 		questions = shuffleArray(questions)
 	}
+	timer := time.AfterFunc(time.Duration(timeDurance*int64(time.Second)), func() {
+		fmt.Println("TIME IS OUT")
+		fmt.Println("You got", rightAnswer, " out of ", len(questions), " questions")
+		os.Exit(0)
+	})
+	defer timer.Stop()
 
 	for _, question := range questions {
-		select {
-		//If the channel has reported timer is out of time then return
-		case <-timer.C:
-			fmt.Println("Time is out")
-
-			return rightAnswer, len(questions)
-		default:
-			fmt.Println(question.Question)
-			fmt.Scan(&input)
-			input = unifyText(input)
-			if input == question.Answer {
-				rightAnswer++
-			} else {
-				wrongAnswer++
-			}
+		fmt.Println(question.Question)
+		fmt.Scan(&input)
+		input = unifyText(input)
+		if input == question.Answer {
+			rightAnswer++
+		} else {
+			wrongAnswer++
 		}
 	}
 	fmt.Println("END OF QUIZ")
@@ -123,10 +121,7 @@ func takeQuiz(timeDurance int64, shuffle bool) (int, int) {
 func main() {
 	fileName, timeDurance, shuffle := initFlag()
 	readFile(fileName)
-
 	waitForKey()
-
 	rightAnswers, totalAnswers := takeQuiz(timeDurance, shuffle)
 	fmt.Println("You got", rightAnswers, " out of ", totalAnswers, " questions")
-
 }
