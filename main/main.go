@@ -21,41 +21,37 @@ var questions []Question
 
 func initFlag() (string, int64, bool) {
 	fileName := flag.String("file", "questions.json", "file with questions in JSON")
-	_ = fileName
-
 	timeDurance := flag.Int64("time", 30, "time limit for quiz in SECONDS")
-	_ = timeDurance
-
 	shuffle := flag.Bool("shuffle", false, "shuffle questions")
-	_ = shuffle
 
 	flag.Parse()
 	return *fileName, *timeDurance, *shuffle
 }
 
-func readFile(fileName string) {
+func readFile(fileName string) error {
 	file, err := os.Open(fileName)
 	if err != nil {
-		fmt.Printf("Faild to open JSON file: %s", fileName)
-		os.Exit(1)
+		fmt.Errorf("failed to open JSON file: %s", fileName)
+		return err
 	}
 	defer file.Close()
 	_ = file
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		fmt.Printf("Failed to read the file content: %s", err.Error())
-		os.Exit(1)
+		fmt.Errorf("failed to read the file content: %s", err.Error())
+		return err
 	}
 
 	err = json.Unmarshal(bytes, &questions)
 	if err != nil {
 		fmt.Printf("Failed to unmarshall the file content: %s", err.Error())
-		os.Exit(1)
+		return err
 	}
+	return nil
 }
 
-func waitForKey() bool {
+func waitForKey() {
 	fmt.Println("PRESS ENTER TO START")
 	if err := keyboard.Open(); err != nil {
 		panic(err)
@@ -70,7 +66,7 @@ func waitForKey() bool {
 			panic(err)
 		}
 		if key == keyboard.KeyEnter {
-			return true
+			return
 		}
 	}
 }
@@ -91,18 +87,14 @@ func takeQuiz(timeDurance int64, shuffle bool) (int, int) {
 	fmt.Println("START OF QUIZ")
 	var input string
 	rightAnswer := 0
-	wrongAnswer := 0
-	//timer := time.NewTimer(time.Duration(timeDurance * int64(time.Second)))
-
 	if shuffle == true {
 		questions = shuffleArray(questions)
 	}
-	timer := time.AfterFunc(time.Duration(timeDurance*int64(time.Second)), func() {
-		fmt.Println("TIME IS OUT")
+	time.AfterFunc(time.Duration(timeDurance*int64(time.Second)), func() {
+		fmt.Println("\nTIME IS OUT")
 		fmt.Println("You got", rightAnswer, " out of ", len(questions), " questions")
 		os.Exit(0)
 	})
-	defer timer.Stop()
 
 	for _, question := range questions {
 		fmt.Println(question.Question)
@@ -110,8 +102,6 @@ func takeQuiz(timeDurance int64, shuffle bool) (int, int) {
 		input = unifyText(input)
 		if input == question.Answer {
 			rightAnswer++
-		} else {
-			wrongAnswer++
 		}
 	}
 	fmt.Println("END OF QUIZ")
@@ -120,8 +110,10 @@ func takeQuiz(timeDurance int64, shuffle bool) (int, int) {
 
 func main() {
 	fileName, timeDurance, shuffle := initFlag()
-	readFile(fileName)
-	waitForKey()
-	rightAnswers, totalAnswers := takeQuiz(timeDurance, shuffle)
-	fmt.Println("You got", rightAnswers, " out of ", totalAnswers, " questions")
+	if readFile(fileName) == nil {
+		waitForKey()
+		rightAnswers, totalAnswers := takeQuiz(timeDurance, shuffle)
+		fmt.Println("You got", rightAnswers, " out of ", totalAnswers, " questions")
+	}
+	os.Exit(0)
 }
