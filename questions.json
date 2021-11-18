@@ -1,26 +1,10 @@
 [
   {
-    "question": "Capital of Ukraine",
-    "answer": "kyiv"
+    "question": "Which country has the capital city Madrid?",
+    "answer": "Spain"
   },
   {
-    "question": "5+5",
-    "answer": "10"
-  },
-  {
-    "question": "7+3",
-    "answer": "10"
-  },
-  {
-    "question": "1+1",
+    "question": "1*2",
     "answer": "2"
-  },
-  {
-    "question": "8+3",
-    "answer": "11"
-  },
-  {
-    "question": "1+2",
-    "answer": "3"
   }
 ]

@@ -20,7 +20,7 @@ type Question struct {
 var questions []Question
 
 func initFlag() (string, int64, bool) {
-	fileName := flag.String("file", "questions.json", "file with questions in JSON")
+	fileName := flag.String("file", "problems.json", "file with questions in JSON")
 	timeDurance := flag.Int64("time", 30, "time limit for quiz in SECONDS")
 	shuffle := flag.Bool("shuffle", false, "shuffle questions")
 
@@ -100,7 +100,7 @@ func takeQuiz(timeDurance int64, shuffle bool) (int, int) {
 		fmt.Println(question.Question)
 		fmt.Scan(&input)
 		input = unifyText(input)
-		if input == question.Answer {
+		if input == unifyText(question.Answer) {
 			rightAnswer++
 		}
 	}
